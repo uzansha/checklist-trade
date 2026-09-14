@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Checklist Entry — XAU/USD</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #0a1018;
+    --panel: #111a29;
+    --panel-2: #16223480;
+    --border: #24314a;
+    --border-soft: #1a2437;
+    --text: #e7ecf3;
+    --muted: #8592a8;
+    --muted-2: #5c6a82;
+    --gold: #c9a227;
+    --gold-soft: #c9a22722;
+    --red: #c1443d;
+    --red-soft: #c1443d1c;
+    --green: #4c9a6a;
+    --green-soft: #4c9a6a1c;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background: var(--bg);
+    background-image:
+      radial-gradient(ellipse 800px 400px at 15% -5%, #c9a22712, transparent),
+      radial-gradient(ellipse 600px 300px at 100% 10%, #1a2c4a55, transparent);
+    color: var(--text);
+    font-family: 'Space Grotesk', sans-serif;
+    min-height: 100vh;
+    padding: 28px 16px 100px;
+  }
+  .wrap{ max-width: 640px; margin: 0 auto; }
+
+  /* header */
+  .ticker{
+    display:flex; align-items:baseline; gap:10px;
+    font-family:'IBM Plex Mono', monospace;
+    color: var(--muted);
+    font-size: 12px;
+    letter-spacing: 0.02em;
+    margin-bottom: 6px;
+  }
+  .ticker b{ color: var(--gold); font-weight:600; }
+  h1{
+    font-size: 26px;
+    font-weight: 700;
+    margin: 0 0 4px;
+    letter-spacing: -0.01em;
+  }
+  .sub{ color: var(--muted); font-size: 14px; margin: 0 0 24px; line-height:1.5; max-width: 50ch; }
+
+  /* progress */
+  .progress-row{
+    display:flex; align-items:center; gap:14px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-bottom: 22px;
+  }
+  .progress-bar{
+    flex:1; height:6px; background:var(--border-soft); border-radius:3px; overflow:hidden;
+  }
+  .progress-fill{
+    height:100%; background: linear-gradient(90deg, var(--gold), #e6c35c);
+    width:0%; transition: width .35s ease;
+  }
+  .progress-num{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 13px; color: var(--gold); min-width: 48px; text-align:right;
+    font-weight:600;
+  }
+
+  /* steps */
+  .step{
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    margin-bottom: 14px;
+    overflow: hidden;
+  }
+  .step-head{
+    display:flex; align-items:center; gap:12px;
+    padding: 16px 16px;
+    cursor:pointer;
+    user-select:none;
+  }
+  .step-num{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--bg);
+    background: var(--gold);
+    width: 24px; height:24px;
+    border-radius: 50%;
+    display:flex; align-items:center; justify-content:center;
+    font-weight:600;
+    flex-shrink:0;
+  }
+  .step-num.done{ background: var(--green); }
+  .step-title{ flex:1; }
+  .step-title .tf{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 11px; color: var(--muted); display:block; margin-top:2px;
+  }
+  .step-title .name{ font-size: 15.5px; font-weight: 600; }
+  .step-count{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 11px; color: var(--muted-2);
+  }
+  .chev{ color: var(--muted-2); transition: transform .2s ease; font-size:12px;}
+  .step.open .chev{ transform: rotate(90deg); }
+  .step-body{
+    max-height:0; overflow:hidden; transition: max-height .28s ease;
+    border-top: 1px solid var(--border-soft);
+  }
+  .step.open .step-body{ max-height: 900px; }
+  .items{ padding: 6px 16px 14px; }
+  .item{
+    display:flex; align-items:flex-start; gap:12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border-soft);
+  }
+  .item:last-child{ border-bottom:none; }
+  .item input[type=checkbox]{
+    appearance:none; -webkit-appearance:none;
+    width:19px; height:19px; margin-top:1px;
+    border: 1.5px solid var(--muted-2);
+    border-radius: 5px;
+    flex-shrink:0;
+    cursor:pointer;
+    position:relative;
+    transition: all .15s ease;
+  }
+  .item input[type=checkbox]:checked{
+    background: var(--green);
+    border-color: var(--green);
+  }
+  .item input[type=checkbox]:checked::after{
+    content:"";
+    position:absolute; left:6px; top:2px;
+    width:5px; height:10px;
+    border: solid var(--bg);
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+  }
+  .item label{
+    font-size: 14px; line-height: 1.5; color: var(--text); cursor:pointer;
+  }
+  .item.checked label{ color: var(--muted); text-decoration: line-through; text-decoration-color: var(--muted-2); }
+  .item .note{
+    font-size: 12.5px; color: var(--muted); display:block; margin-top:2px; line-height:1.5;
+  }
+  .result-tag{
+    margin: 4px 16px 14px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--gold);
+    background: var(--gold-soft);
+    border: 1px solid #c9a22740;
+    padding: 8px 12px;
+    border-radius: 8px;
+  }
+
+  /* aturan emas */
+  .rules{
+    background: var(--red-soft);
+    border: 1px solid #c1443d40;
+    border-radius: 12px;
+    padding: 16px 16px 14px;
+    margin-top: 22px;
+  }
+  .rules h3{
+    margin:0 0 10px; font-size:14px; color: var(--red); font-weight:600;
+  }
+  .rules ul{ margin:0; padding-left: 18px; }
+  .rules li{ font-size: 13.5px; color: var(--text); line-height:1.6; margin-bottom:4px; }
+
+  /* actions */
+  .actions{
+    display:flex; gap:10px; margin-top: 22px; flex-wrap:wrap;
+  }
+  button{
+    font-family:'Space Grotesk', sans-serif;
+    font-size: 13.5px; font-weight:600;
+    padding: 11px 16px;
+    border-radius: 9px;
+    border: 1px solid var(--border);
+    background: var(--panel);
+    color: var(--text);
+    cursor:pointer;
+    transition: all .15s ease;
+  }
+  button:hover{ border-color: var(--gold); color: var(--gold); }
+  button.primary{
+    background: var(--gold); color: var(--bg); border-color: var(--gold);
+  }
+  button.primary:hover{ background:#e6c35c; color: var(--bg); }
+  #fileInput{ display:none; }
+
+  .footer-note{
+    margin-top: 26px;
+    font-size: 12px; color: var(--muted-2); line-height:1.6;
+    font-family:'IBM Plex Mono', monospace;
+  }
+
+  .toast{
+    position: fixed; bottom: 24px; left:50%; transform: translateX(-50%) translateY(20px);
+    background: var(--green); color: #06140c;
+    padding: 10px 18px; border-radius: 8px;
+    font-size: 13px; font-weight:600;
+    opacity:0; transition: all .25s ease;
+    pointer-events:none;
+  }
+  .toast.show{ opacity:1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="ticker">XAU<b>/</b>USD <span>· pre-trade checklist</span> <span id="syncStatus" style="color:var(--muted-2)">· menghubungkan…</span></div>
+  <h1>Cek dulu, baru entry.</h1>
+  <p class="sub">Empat langkah top-down: bias, struktur, konfirmasi, eksekusi. Isi urut dari atas ke bawah sebelum buka posisi.</p>
+
+  <div class="progress-row">
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="progress-num" id="progressNum">0/16</div>
+  </div>
+
+  <div id="steps"></div>
+
+  <div class="rules">
+    <h3>Aturan emas</h3>
+    <ul>
+      <li>Jangan entry kalau bias H1/H4 tidak jelas — mending skip.</li>
+      <li>Jangan buy di downtrend H1 kecuali niatnya scalping cepat dengan TP ketat.</li>
+      <li>Jangan tambah entry (averaging) kalau arah besar sedang melawan posisi kamu.</li>
+    </ul>
+  </div>
+
+  <div class="actions">
+    <button class="primary" id="resetBtn">Trade baru (reset)</button>
+    <button id="exportBtn">Export JSON</button>
+    <button id="importBtn">Import JSON</button>
+    <input type="file" id="fileInput" accept="application/json">
+  </div>
+
+  <p class="footer-note">Data tersimpan lokal di browser ini. Untuk pindah progres ke device lain (laptop ↔ HP), pakai Export di satu device lalu Import di device lain.</p>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
+import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAr4HU8uJhrjQ0UxFT3rav3fFVbys3WCgY",
+  authDomain: "xau-checklist.firebaseapp.com",
+  projectId: "xau-checklist",
+  storageBucket: "xau-checklist.firebasestorage.app",
+  messagingSenderId: "491992187263",
+  appId: "1:491992187263:web:4f1f4b4fed99c1cfc85a4a"
+};
+
+const fbApp = initializeApp(firebaseConfig);
+const db = getFirestore(fbApp);
+const stateDocRef = doc(db, "checklist", "state");
+
+const DATA = [
+  {
+    tf: "H4 / H1",
+    name: "1 · Tentukan Bias",
+    items: [
+      { t: "Struktur harga: higher-high/higher-low (uptrend) atau lower-high/lower-low (downtrend)?" },
+      { t: "Posisi harga sekarang: dekat resistance mayor, support mayor, atau di tengah range?" },
+      { t: "Uji sederhana: tanpa indikator, kalau dilihat awam arah chart ini ke mana?" },
+      { t: "Simpulkan bias: BUY only / SELL only / NO TRADE (ranging, tidak jelas)" },
+    ]
+  },
+  {
+    tf: "M30 / M15",
+    name: "2 · Struktur & Zona",
+    items: [
+      { t: "Cari BOS terakhir yang searah bias — jangan lawan arah dari langkah 1" },
+      { t: "Tandai IDM (inducement): swing kecil sebelum BOS" },
+      { t: "Tarik fibonacci dari swing pembentuk BOS, cari overlap dengan S/R historis" },
+      { t: "Cek riwayat level ini: sudah berapa kali disentuh? (makin sering, makin lemah)" },
+      { t: "Tandai zona entry potensial (order block / fib zone)" },
+    ]
+  },
+  {
+    tf: "M5 / M3",
+    name: "3 · Konfirmasi",
+    items: [
+      { t: "Tunggu harga masuk ke zona entry dari langkah 2" },
+      { t: "Minimal 2 candle searah — bukan cuma 1 doji + 1 candle balik" },
+      { t: "Body candle konfirmasi menutup di atas/bawah 50% body candle sebelumnya" },
+      { t: "Indikator tambahan (stochastic dsb) mendukung — bukan jadi penentu tunggal" },
+    ]
+  },
+  {
+    tf: "Eksekusi",
+    name: "4 · Entry & Risk",
+    items: [
+      { t: "SL di luar zona, bukan pas di garis persis — kasih ruang antisipasi stop hunt" },
+      { t: "Jarak SL masuk akal untuk volatilitas gold saat ini" },
+      { t: "TP mengacu ke struktur (swing terdekat), bukan angka bulat sembarangan" },
+      { t: "R:R minimal 1:2" },
+      { t: "Lot size membuat risk per trade ≤ 1–2% modal" },
+    ]
+  }
+];
+
+const STORAGE_KEY = "xau-checklist-state-v1";
+let state = {};
+let applyingRemote = false; // guard so remote snapshots don't re-trigger writes
+
+function loadState(){
+  // instant local cache while Firestore connects, so UI isn't blank
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    state = raw ? JSON.parse(raw) : {};
+  }catch(e){ state = {}; }
+}
+function saveState(){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  if(applyingRemote) return; // don't write back what we just received
+  setDoc(stateDocRef, state).catch(() => {
+    setSyncStatus("gagal sync, tersimpan lokal saja", "var(--red)");
+  });
+}
+
+function setSyncStatus(text, color){
+  const el = document.getElementById("syncStatus");
+  el.textContent = "· " + text;
+  el.style.color = color || "var(--muted-2)";
+}
+
+onSnapshot(stateDocRef, (snap) => {
+  applyingRemote = true;
+  state = snap.exists() ? snap.data() : {};
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  render();
+  applyingRemote = false;
+  setSyncStatus("tersinkron", "var(--green)");
+}, (err) => {
+  setSyncStatus("offline (pakai data lokal)", "var(--red)");
+});
+
+function itemKey(si, ii){ return si + "-" + ii; }
+
+function render(){
+  const container = document.getElementById("steps");
+  container.innerHTML = "";
+  let totalDone = 0, totalItems = 0;
+
+  DATA.forEach((step, si) => {
+    const doneCount = step.items.filter((_, ii) => state[itemKey(si,ii)]).length;
+    totalDone += doneCount;
+    totalItems += step.items.length;
+    const stepDone = doneCount === step.items.length;
+
+    const stepEl = document.createElement("div");
+    stepEl.className = "step" + (state["_open_"+si] ? " open" : "");
+
+    const head = document.createElement("div");
+    head.className = "step-head";
+    head.innerHTML = `
+      <div class="step-num ${stepDone ? 'done' : ''}">${stepDone ? '✓' : si+1}</div>
+      <div class="step-title">
+        <span class="name">${step.name}</span>
+        <span class="tf">${step.tf}</span>
+      </div>
+      <div class="step-count">${doneCount}/${step.items.length}</div>
+      <div class="chev">▸</div>
+    `;
+    head.addEventListener("click", () => {
+      state["_open_"+si] = !state["_open_"+si];
+      saveState(); render();
+    });
+
+    const body = document.createElement("div");
+    body.className = "step-body";
+    const itemsWrap = document.createElement("div");
+    itemsWrap.className = "items";
+
+    step.items.forEach((item, ii) => {
+      const key = itemKey(si, ii);
+      const checked = !!state[key];
+      const row = document.createElement("div");
+      row.className = "item" + (checked ? " checked" : "");
+      const cbId = "cb-"+key;
+      row.innerHTML = `
+        <input type="checkbox" id="${cbId}" ${checked ? "checked" : ""}>
+        <label for="${cbId}">${item.t}</label>
+      `;
+      row.querySelector("input").addEventListener("change", (e) => {
+        state[key] = e.target.checked;
+        saveState(); render();
+      });
+      itemsWrap.appendChild(row);
+    });
+    body.appendChild(itemsWrap);
+    stepEl.appendChild(head);
+    stepEl.appendChild(body);
+    container.appendChild(stepEl);
+  });
+
+  document.getElementById("progressFill").style.width = (totalDone/totalItems*100) + "%";
+  document.getElementById("progressNum").textContent = totalDone + "/" + totalItems;
+}
+
+function showToast(msg){
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 1800);
+}
+
+document.getElementById("resetBtn").addEventListener("click", () => {
+  if(!confirm("Reset semua centang untuk trade baru?")) return;
+  state = {};
+  saveState(); render();
+  showToast("Checklist direset — tersinkron ke semua device");
+});
+
+document.getElementById("exportBtn").addEventListener("click", () => {
+  const blob = new Blob([JSON.stringify(state, null, 2)], {type:"application/json"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  const stamp = new Date().toISOString().slice(0,16).replace(/[:T]/g,"-");
+  a.href = url;
+  a.download = `xau-checklist-${stamp}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast("Diexport — kirim file ke device lain");
+});
+
+document.getElementById("importBtn").addEventListener("click", () => {
+  document.getElementById("fileInput").click();
+});
+document.getElementById("fileInput").addEventListener("change", (e) => {
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = (evt) => {
+    try{
+      state = JSON.parse(evt.target.result);
+      saveState(); render();
+      showToast("Import berhasil — tersinkron ke semua device");
+    }catch(err){
+      alert("File tidak valid.");
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = "";
+});
+
+loadState();
+render();
+</script>
+</body>
+</html>
